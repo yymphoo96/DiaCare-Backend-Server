@@ -1,10 +1,13 @@
 from pydantic import BaseModel, EmailStr
+from typing import List
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, DateTime, UniqueConstraint
 
 
 class ActivityData(BaseModel):
     user_id: int
     activity_type: str
-    value: int
+    value: float
+    unit: str
     date: str
 
 class UserSignup(BaseModel):
@@ -27,3 +30,12 @@ class AuthResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     name: str
+
+class ActivityResponse(BaseModel):
+    success: bool
+    message: str
+
+class MissingDatesResponse(BaseModel):
+    missing_dates: List[str]
+    total_missing: int
+    date_range: dict
