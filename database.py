@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 import os
 
 # Database connection
-DATABASE_URL = "postgresql://yinyinmayphoo:password@localhost:5432/DiaCare"
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://yinyinmayphoo:password@localhost:5432/DiaCare")
+DATABASE_URL = "postgresql://yinyinmayphoo:password@localhost:5432/diacare"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://yinyinmayphoo:password@localhost:5432/diacare")
 # For SQLite (development): DATABASE_URL = "sqlite:///./wellness.db"
 
 engine = create_engine(DATABASE_URL)

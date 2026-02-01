@@ -5,8 +5,11 @@ from datetime import datetime,date
 from models import *
 from database import *
 from auth import *
+from prediction import *
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 import os
+import joblib
+import numpy as np
 
 # Create a FastAPI instance. This is the main object for your API.
 app = FastAPI()
@@ -361,4 +364,91 @@ async def update_profile(
     
     return UserResponse(**dict(updated_user))
 
+@app.post("/api/predict-diabetes", response_model=PredictionResponse)
+async def predict_diabetes(data: BRFSSPredictionInput):
+    try:
+        if model_manager.model is None:
+            raise HTTPException(status_code=503, detail="Model not loaded")
+        
+        # Prepare features
+        features_df = prepare_features_for_model(data)
+        print(data)
+        #Scaling
+        values = list(data.dict().values())
+
+        # Shape (1, n_features)
+        user_input = np.array([values], dtype=float)
+
+        # Scale using SAME scaler
+        # print(model_manager.scaler.var_)
+        print(user_input)
+        user_input[:, [3,13,14,15,18,19,20]] = model_manager.scaler.transform(user_input[:, [3,13,14,15,18,19,20]])
+        print(user_input)
+        
+        # Make prediction
+        prediction_proba = model_manager.model.predict_proba(user_input)[0]
+        probability = float(prediction_proba[1])
+        prediction_class = int(probability >= 0.5)
+        
+        # Determine risk level
+        if probability < 0.3:
+            risk_level = "Low"
+        elif probability < 0.6:
+            risk_level = "Moderate"
+        else:
+            risk_level = "High"
+        
+        risk_score = int(probability * 100)
+        risk_factors = assess_risk_factors(features_df)
+        # print(features_df)
+        # print(user_input_scaled)
+        print(prediction_proba)
+        recommendations = generate_recommendations(risk_factors, features_df)
+        
+        response = PredictionResponse(
+            prediction="High Risk" if prediction_class == 1 else "Low Risk",
+            probability=round(probability, 3),
+            risk_level=risk_level,
+            risk_score=risk_score,
+            risk_factors=risk_factors,
+            recommendations=recommendations,
+            timestamp=datetime.utcnow().isoformat()
+        )
+        
+        print(f"✅ Prediction: {response.prediction} ({risk_score}%)")
+        print("Done, Thanks for prediction..............")
+        return response
+    
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Model Info Endpoint
+# ============================================================================
+
+@app.get("/api/model-info")
+async def get_model_info():
+    """Get information about the loaded model"""
+    
+    if model_manager.model is None:
+        return {
+            "status": "error",
+            "message": "Model not loaded"
+        }
+    
+    try:
+        return {
+            "status": "ready",
+            "model_type": "CatBoost Classifier",
+            "model_loaded": True,
+            "feature_count": len(model_manager.feature_names) if model_manager.feature_names else "Unknown",
+            "model_path": MODEL_PATH
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 # Run with: uvicorn main:app --reload
