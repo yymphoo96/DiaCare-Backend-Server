@@ -17,7 +17,7 @@ import os
 # ============================================================================
 
 # Database URL - Update with your database credentials
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/wellness_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/DiaCare")
 # For SQLite (development): DATABASE_URL = "sqlite:///./wellness.db"
 
 engine = create_engine(DATABASE_URL)

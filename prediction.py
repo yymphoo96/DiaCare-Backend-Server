@@ -82,8 +82,8 @@ class BRFSSPredictionInput(BaseModel):
     no_doctor_cost: bool = Field(description="NoDocbcCost, Was there a time in the past 12 months when you needed to see a doctor but\
                                   could not because of cost? 0 = no 1 = yes")
     general_health: int = Field(..., ge=1, le=5, description="General health,Would you say that in general your health is: scale 1-5 1 = excellent 2 = very good 3 = good 4 = fair 5 = poor")
-    mental_health: int = Field(..., ge=1, le=30, description="Mental health, days of poor mental health scale 1-30 days")
-    physical_health: int = Field(..., ge=1, le=30, description="Physical health, physical illness or injury days in past 30 days scale 1-30")
+    mental_health: int = Field(..., ge=0, le=30, description="Mental health, days of poor mental health scale 0-30 days")
+    physical_health: int = Field(..., ge=0, le=30, description="Physical health, physical illness or injury days in past 30 days scale 0-30")
     difficulty_walking: bool = Field(..., description="Do you have serious difficulty walking or climbing stairs? 0 = no 1 = yes")
     gender: bool = Field(..., description="0=female, 1=male")
     age: int = Field(..., ge=1, le=13, description="Age in years,1: Age 18 to 24\

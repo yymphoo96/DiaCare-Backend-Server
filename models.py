@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Date, Date
 
 
 class ActivityData(BaseModel):
-    user_id: int
+    user_id: str
     activity_type: str
     value: float
     unit: str
