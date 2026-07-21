@@ -364,6 +364,28 @@ async def update_profile(
     
     return UserResponse(**dict(updated_user))
 
+@app.delete("/user/account", status_code=status.HTTP_200_OK)
+async def delete_account(
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_database)
+):
+    """Permanently delete user account and all associated data"""
+    user_id = current_user["id"]
+
+    # Delete health activities first (foreign key constraint)
+    await conn.execute(
+        "DELETE FROM health_activities WHERE user_id = $1",
+        user_id
+    )
+
+    # Delete the user account
+    await conn.execute(
+        "DELETE FROM users WHERE id = $1",
+        user_id
+    )
+
+    return {"message": "Account deleted successfully"}
+
 @app.post("/api/predict-diabetes", response_model=PredictionResponse)
 async def predict_diabetes(data: BRFSSPredictionInput):
     try:
@@ -412,6 +434,8 @@ async def predict_diabetes(data: BRFSSPredictionInput):
             risk_score=risk_score,
             risk_factors=risk_factors,
             recommendations=recommendations,
+            clinical_action=CLINICAL_ACTIONS[risk_level],
+            chatbot_prompt=CHATBOT_PROMPT,
             timestamp=datetime.utcnow().isoformat()
         )
         

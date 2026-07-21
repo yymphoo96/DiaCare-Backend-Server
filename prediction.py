@@ -145,7 +145,34 @@ class PredictionResponse(BaseModel):
     risk_score: int  # 0-100
     risk_factors: List[str]
     recommendations: List[str]
+    clinical_action: str  # Redirection message based on risk level
+    chatbot_prompt: str   # Prompt encouraging user to chat with AI chatbot
     timestamp: str
+
+
+CLINICAL_ACTIONS = {
+    "High": (
+        "Your risk score indicates a high likelihood of diabetes risk. "
+        "Please seek clinical evaluation from a doctor or diabetes specialist as soon as possible. "
+        "Do not delay — early diagnosis significantly improves health outcomes."
+    ),
+    "Moderate": (
+        "Your risk score indicates a moderate diabetes risk. "
+        "You are encouraged to modify your lifestyle — improve your diet, increase physical activity, "
+        "and reduce known risk factors. Please retest within 1 to 3 months to monitor your progress."
+    ),
+    "Low": (
+        "Your risk score indicates a low diabetes risk. "
+        "Continue maintaining your healthy habits. "
+        "Consider retesting periodically to keep track of your health status over time."
+    ),
+}
+
+CHATBOT_PROMPT = (
+    "Chat with our AI chatbot to receive personalised dietary and lifestyle guidance "
+    "based on your risk profile. The chatbot will provide recommendations tailored to "
+    "your health data and Myanmar lifestyle habits."
+)
 # ============================================================================
 # Convert iOS Health Profile to BRFSS Features
 # ============================================================================
